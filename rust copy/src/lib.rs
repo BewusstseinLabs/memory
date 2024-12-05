@@ -1,5 +1,4 @@
 // Copyright 2024 Bewusstsein Labs
 
-mod memory;
-
-pub use memory::*;
+pub mod memory;
+pub mod storage;
