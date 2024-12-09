@@ -3,10 +3,13 @@
 pub mod heap;
 pub mod stack;
 
-use std::ops::{ Index, IndexMut };
+use std::{
+    fmt::Debug,
+    ops::{ Index, IndexMut }
+};
 
 pub trait MemoryType {
-    type Data<T>: Default + Clone + Index<usize, Output = T> + IndexMut<usize, Output = T> + IntoIterator<Item = T> where T: 'static + Default + Copy;
+    type Data<T>: Default + Clone + Debug + Index<usize, Output = T> + IndexMut<usize, Output = T> + IntoIterator<Item = T> where T: 'static + Default + Copy + Debug;
 }
 
 pub trait MemoryTraits: Index<usize, Output = Self::Type> + IndexMut<usize, Output = Self::Type> + IntoIterator<Item = Self::Type> {
@@ -29,15 +32,33 @@ pub trait MemoryTraits: Index<usize, Output = Self::Type> + IndexMut<usize, Outp
     fn iter_mut( &mut self ) -> std::slice::IterMut<Self::Type>;
 }
 
-#[derive( Clone, Default )]
+impl<T, U> Copy for Memory<T, U>
+where
+    T: Default + Copy + Debug,
+    U: MemoryType + Clone,
+    U::Data<T>: Copy
+{}
+
+#[derive( Clone, Default, Debug )]
 pub struct Memory<T, U>( U::Data<T> )
 where
-    T: 'static + Copy + Default,
+    T: 'static + Copy + Default + Debug,
     U: MemoryType;
+
+impl<T, U> PartialEq for Memory<T, U>
+where
+    T: Default + Copy + Debug + PartialEq,
+    U: MemoryType,
+    U::Data<T>: PartialEq,
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0
+    }
+}
 
 impl<T, U> Index<usize> for Memory<T, U>
 where
-    T: Default + Copy,
+    T: Default + Copy + Debug,
     U: MemoryType
 {
     type Output = T;
@@ -49,7 +70,7 @@ where
 
 impl<T, U> IndexMut<usize> for Memory<T, U>
 where
-    T: Default + Copy,
+    T: Default + Copy + Debug,
     U: MemoryType
 {
     fn index_mut( &mut self, index: usize ) -> &mut Self::Output {
@@ -59,7 +80,7 @@ where
 
 impl<T, U> IntoIterator for Memory<T, U>
 where
-    T: Default + Copy,
+    T: Default + Copy + Debug,
     U: MemoryType
 {
     type Item = T;
@@ -72,7 +93,7 @@ where
 
 impl<'a, T, U> IntoIterator for &'a Memory<T, U>
 where
-    T: Default + Copy,
+    T: Default + Copy + Debug,
     U: MemoryType,
     Memory<T, U>: MemoryTraits<Type = T>
 {
@@ -86,7 +107,7 @@ where
 
 impl<'a, T, U> IntoIterator for &'a mut Memory<T, U>
 where
-    T: Default + Copy,
+    T: Default + Copy + Debug,
     U: MemoryType,
     Memory<T, U>: MemoryTraits<Type = T>
 {

@@ -1,10 +1,13 @@
 // Copyright 2024 Bewusstsein Labs
 
-use std::ops::{ Index, IndexMut };
-use std::ops::{ Deref, DerefMut };
+use std::{
+    fmt::Debug,
+    ops::{ Index, IndexMut, Deref, DerefMut }
+};
+
 use crate::memory::{ MemoryTraits, MemoryType, Memory };
 
-#[derive( Clone )]
+#[derive( Clone, Copy, PartialEq )]
 pub struct Array<T, const N: usize> ( [T; N] ) where T: 'static + Default + Copy;
 
 impl<T, const N: usize> Array<T, N>
@@ -13,6 +16,15 @@ where
 {
     pub fn new( array: [T; N] ) -> Self {
         Self( array )
+    }
+}
+
+impl<T, const N: usize> Debug for Array<T, N>
+where
+    T: 'static + Default + Copy + Debug
+{
+    fn fmt( &self, f: &mut std::fmt::Formatter<'_> ) -> std::fmt::Result {
+        f.debug_list().entries( self.0.iter() ).finish()
     }
 }
 
@@ -80,12 +92,12 @@ where
 #[derive( Copy, Clone, Default, Debug )]
 pub struct Stack<const CAP: usize>;
 impl<const CAP: usize> MemoryType for Stack<CAP> {
-    type Data<T> = Array<T, CAP> where T: 'static + Default + Copy;
+    type Data<T> = Array<T, CAP> where T: 'static + Default + Copy + Debug;
 }
 
 impl<T, const CAP: usize> MemoryTraits for Memory<T, Stack<CAP>>
 where
-    T: 'static + Default + Copy + Clone
+    T: 'static + Default + Copy + Clone + Debug
 {
     type Type = T;
     type New = ();

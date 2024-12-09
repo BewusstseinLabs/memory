@@ -1,19 +1,22 @@
 // Copyright 2024 Bewusstsein Labs
 
-use std::ptr::NonNull;
-use std::ops::{ Index, IndexMut };
+use std::{
+    fmt::Debug,
+    ptr::NonNull,
+    ops::{ Index, IndexMut, Deref, DerefMut }
+};
 
 use crate::memory::{ MemoryTraits, MemoryType, Memory };
 
 #[derive( Copy, Clone, Default, Debug )]
 pub struct Heap();
 impl MemoryType for Heap {
-    type Data<T> = Vec<T> where T: 'static + Default + Copy;
+    type Data<T> = Vec<T> where T: 'static + Default + Copy + Debug;
 }
 
 impl<T> MemoryTraits for Memory<T, Heap>
 where
-    T: 'static + Default + Copy + Clone
+    T: 'static + Default + Copy + Clone + Debug
 {
     type Type = T;
     type New = usize;
