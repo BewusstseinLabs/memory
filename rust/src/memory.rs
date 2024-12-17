@@ -5,7 +5,7 @@ pub mod stack;
 
 use std::{
     fmt::Debug,
-    ops::{ Index, IndexMut }
+    ops::{ Deref, Index, IndexMut }
 };
 
 pub trait MemoryType {
@@ -15,11 +15,9 @@ pub trait MemoryType {
 pub trait MemoryTraits: Index<usize, Output = Self::Type> + IndexMut<usize, Output = Self::Type> + IntoIterator<Item = Self::Type> {
     type Type: Copy + Default;
     type New;
-    type Take;
     type Data: Default + Index<usize, Output = Self::Type> + IndexMut<usize, Output = Self::Type>;
 
     fn new( new_type: Self::New ) -> Self;
-    fn take( take_type: Self::Take ) -> Self;
     fn cap( &self ) -> usize;
     fn len( &self ) -> usize;
     fn is_empty( &self ) -> bool { self.len() == 0 }
@@ -44,6 +42,18 @@ pub struct Memory<T, U>( U::Data<T> )
 where
     T: 'static + Copy + Default + Debug,
     U: MemoryType;
+
+impl<T, U> Deref for Memory<T, U>
+where
+    T: Default + Copy + Debug,
+    U: MemoryType
+{
+    type Target = U::Data<T>;
+
+    fn deref( &self ) -> &Self::Target {
+        &self.0
+    }
+}
 
 impl<T, U> PartialEq for Memory<T, U>
 where

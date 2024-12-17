@@ -100,15 +100,10 @@ where
     T: 'static + Default + Copy + Clone + Debug
 {
     type Type = T;
-    type New = ();
-    type Take = [T; CAP];
+    type New = [T; CAP];
     type Data = Array<T, CAP>;
 
-    fn new( _: () ) -> Self {
-        Self ( Array::default() )
-    }
-
-    fn take( src: [T; CAP] ) -> Self {
+    fn new( src: Self::New ) -> Self {
         Self ( Array::new( src ) )
     }
 
@@ -155,7 +150,7 @@ mod tests {
 
     #[test]
     fn new_test() {
-        let stack = Memory::<u32, Stack<10>>::new(());
+        let stack = Memory::<u32, Stack<10>>::new( [ 0_u32; 10 ] );
         assert_eq!( stack.cap(), 10 );
     }
 
@@ -188,7 +183,7 @@ mod tests {
     #[test]
     fn take_test() {
         let src = [ 1, 2, 3, 4, 5 ];
-        let stack = Memory::<u32, Stack<5>>::take( src );
+        let stack = Memory::<u32, Stack<5>>::new( src );
         assert_eq!( stack.cap(), 5 );
         assert_eq!( stack[ 0 ], 1 );
         assert_eq!( stack[ 1 ], 2 );
@@ -199,7 +194,7 @@ mod tests {
 
     #[test]
     fn reserve_test() {
-        let mut stack = Memory::<u32, Stack<5>>::new(());
+        let mut stack = Memory::<u32, Stack<5>>::new( [ 0_u32; 5 ] );
         stack.reserve( 10 );
         assert_eq!( stack.cap(), 5 );
         assert_eq!( stack[ 0 ], 0 );
@@ -211,7 +206,7 @@ mod tests {
 
     #[test]
     fn resize_test() {
-        let mut stack = Memory::<u32, Stack<5>>::new(());
+        let mut stack = Memory::<u32, Stack<5>>::new( [ 0_u32; 5 ] );
         stack.resize( 10, 1 );
         assert_eq!( stack.cap(), 5 );
         assert_eq!( stack[ 0 ], 0 );
@@ -223,7 +218,7 @@ mod tests {
 
     #[test]
     fn as_ptr_test() {
-        let stack = Memory::<u32, Stack<5>>::new(());
+        let stack = Memory::<u32, Stack<5>>::new( [ 0_u32; 5 ] );
         let ptr = stack.as_ptr();
         assert_eq!( unsafe { *ptr }, 0 );
     }
@@ -231,7 +226,7 @@ mod tests {
     #[test]
     fn iter_test() {
         let src = [ 1, 2, 3, 4, 5 ];
-        let stack = Memory::<u32, Stack<5>>::take( src );
+        let stack = Memory::<u32, Stack<5>>::new( src );
         for ( i, value ) in stack.iter().enumerate() {
             assert_eq!( value, &src[ i ] );
         }
@@ -240,7 +235,7 @@ mod tests {
     #[test]
     fn iter_mut_test() {
         let src = [ 1, 2, 3, 4, 5 ];
-        let mut stack = Memory::<u32, Stack<5>>::take( src );
+        let mut stack = Memory::<u32, Stack<5>>::new( src );
         for ( i, value ) in stack.iter_mut().enumerate() {
             *value = src[ i ] + 1;
         }
@@ -252,7 +247,7 @@ mod tests {
     #[test]
     fn into_iter_test() {
         let src = [ 1, 2, 3, 4, 5 ];
-        let stack = Memory::<u32, Stack<5>>::take( src );
+        let stack = Memory::<u32, Stack<5>>::new( src );
         for ( i, value ) in stack.into_iter().enumerate() {
             assert_eq!( value, src[ i ] );
         }

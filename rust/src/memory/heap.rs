@@ -19,15 +19,10 @@ where
     T: 'static + Default + Copy + Clone + Debug
 {
     type Type = T;
-    type New = usize;
-    type Take = Vec<T>;
+    type New = Vec<T>;
     type Data = Vec<T>;
 
-    fn new( cap: usize ) -> Self {
-        Self ( Vec::with_capacity( cap ) )
-    }
-
-    fn take( src: Vec<T> ) -> Self {
+    fn new( src: Self::New ) -> Self {
         Self ( src )
     }
 
@@ -74,7 +69,7 @@ mod tests {
 
     #[test]
     fn new_test() {
-        let heap = Memory::<u32, Heap>::new( 10 );
+        let heap = Memory::<u32, Heap>::new( vec![ 0_u32; 10 ] );
         assert_eq!( heap.cap(), 10 );
     }
 
@@ -101,7 +96,7 @@ mod tests {
     #[test]
     fn take_test() {
         let src = vec![ 1, 2, 3, 4, 5 ];
-        let heap = Memory::<u32, Heap>::take( src );
+        let heap = Memory::<u32, Heap>::new( src );
         assert_eq!( heap.cap(), 5 );
         assert_eq!( heap[ 0 ], 1 );
         assert_eq!( heap[ 1 ], 2 );
@@ -112,14 +107,14 @@ mod tests {
 
     #[test]
     fn reserve_test() {
-        let mut heap = Memory::<u32, Heap>::new( 5 );
+        let mut heap = Memory::<u32, Heap>::new( vec![ 0_u32; 5 ] );
         heap.reserve( 10 );
         assert_eq!( heap.cap(), 10 );
     }
 
     #[test]
     fn resize_test() {
-        let mut heap = Memory::<u32, Heap>::new( 5 );
+        let mut heap = Memory::<u32, Heap>::new( vec![ 0_u32; 5 ] );
         heap.resize( 10, 1 );
         assert_eq!( heap.cap(), 10 );
         assert_eq!( heap[ 0 ], 1 );
@@ -136,7 +131,7 @@ mod tests {
 
     #[test]
     fn as_ptr_test() {
-        let heap = Memory::<u32, Heap>::new( 5 );
+        let heap = Memory::<u32, Heap>::new( vec![ 0_u32; 5 ] );
         let ptr = heap.as_ptr();
         assert_eq!( unsafe { *ptr }, 0 );
     }
@@ -144,7 +139,7 @@ mod tests {
     #[test]
     fn iter_test() {
         let src = vec![ 1, 2, 3, 4, 5 ];
-        let stack = Memory::<u32, Heap>::take( src.clone() );
+        let stack = Memory::<u32, Heap>::new( src.clone() );
         for ( i, value ) in stack.iter().enumerate() {
             assert_eq!( value, &src[ i ] );
         }
@@ -153,7 +148,7 @@ mod tests {
     #[test]
     fn iter_mut_test() {
         let src = vec![ 1, 2, 3, 4, 5 ];
-        let mut stack = Memory::<u32, Heap>::take( src.clone() );
+        let mut stack = Memory::<u32, Heap>::new( src.clone() );
         for ( i, value ) in stack.iter_mut().enumerate() {
             *value = src[ i ] + 1;
         }
@@ -165,7 +160,7 @@ mod tests {
     #[test]
     fn into_iter_test() {
         let src = vec![ 1, 2, 3, 4, 5 ];
-        let stack = Memory::<u32, Heap>::take( src.clone() );
+        let stack = Memory::<u32, Heap>::new( src.clone() );
         for ( i, value ) in stack.into_iter().enumerate() {
             assert_eq!( value, src[ i ] );
         }
