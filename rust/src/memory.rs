@@ -25,6 +25,8 @@ pub trait MemoryTraits: Index<usize, Output = Self::Type> + IndexMut<usize, Outp
     fn resize( &mut self, cap: usize, value: Self::Type );
     fn push( &mut self, value: Self::Type );
     fn pop( &mut self ) -> Option<Self::Type>;
+    fn fill( &mut self, value: Self::Type );
+    fn clear( &mut self );
     fn as_ptr( &self ) -> *const Self::Type;
     fn iter( &self ) -> std::slice::Iter<Self::Type>;
     fn iter_mut( &mut self ) -> std::slice::IterMut<Self::Type>;

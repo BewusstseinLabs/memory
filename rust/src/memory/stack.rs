@@ -131,6 +131,14 @@ where
         None
     }
 
+    fn fill( &mut self, value: Self::Type ) {
+        self.0.fill( value );
+    }
+
+    fn clear( &mut self ) {
+        self.fill( Self::Type::default() );
+    }
+
     fn as_ptr( &self ) -> *const T {
         self.0.as_ptr()
     }
